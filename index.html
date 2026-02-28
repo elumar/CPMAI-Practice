@@ -1004,7 +1004,7 @@ function submit() {
   S.submitted = true;
   const q = S.qs[S.idx];
   if (S.sel === q.correct_answer.trim()) S.correct++;
-  else { S.wrong++; S.missed.push(q.question_id); }
+  else { S.wrong++; S.missed.push({ id: q.question_id, picked: S.sel, correct: q.correct_answer.trim() }); }
   renderQuiz();
 }
 
@@ -1055,7 +1055,7 @@ function renderResults() {
           ${S.missed.length ? `<button class="copy-btn" onclick="copyMissed()">Copy IDs</button>` : ''}
         </div>
         ${S.missed.length
-          ? `<div class="missed-ids">${S.missed.map(id => `<span class="id-chip">${esc(id)}</span>`).join('')}</div>`
+          ? `<div class="missed-ids">${S.missed.map(m => `<span class="id-chip">${esc(m.id)} <span style="color:var(--red);font-weight:600">✗${m.picked}</span> <span style="color:var(--green);font-weight:600">✓${m.correct}</span></span>`).join('')}</div>`
           : `<div class="all-correct">🎯 No missed questions</div>`}
         <div class="copy-toast" id="toast"></div>
         <div class="results-actions">
@@ -1068,7 +1068,7 @@ function renderResults() {
 }
 
 function copyMissed() {
-  const txt = S.missed.join('\n');
+  const txt = S.missed.map(m => `${m.id} (picked: ${m.picked}, correct: ${m.correct})`).join('\n');
   const show = () => {
     const t = $('toast'); if (!t) return;
     t.textContent = '✓ Copied to clipboard';
